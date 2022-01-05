@@ -9,9 +9,9 @@ pub struct Sphere {
 
 impl Hit for Sphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
-        let origin_to_center = r.orig - self.center;
-        let a = r.dir.length_squared();
-        let half_b = origin_to_center.dot(r.dir);
+        let origin_to_center = r.origin - self.center;
+        let a = r.direction.length_squared();
+        let half_b = origin_to_center.dot(r.direction);
         let c = origin_to_center.length_squared() - self.radius*self.radius;
 
         let discriminant = half_b*half_b - a*c;

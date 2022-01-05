@@ -2,8 +2,8 @@ use crate::vec3::Vec3;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
-    pub orig: Vec3,
-    pub dir: Vec3
+    pub origin: Vec3,
+    pub direction: Vec3
 }
 
 pub trait VecAt {
@@ -12,6 +12,6 @@ pub trait VecAt {
 
 impl VecAt for Ray {
     fn at(self, t: f64) -> Vec3 {
-        self.orig + t * self.dir
+        self.origin + t * self.direction
     }
 }
