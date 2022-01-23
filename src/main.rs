@@ -2,12 +2,13 @@
 // use std::io::prelude::*;
 use image::RgbImage;
 use rand::{thread_rng, Rng};
+use rand::distributions::{Distribution, Uniform};
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 mod vec3;
-use vec3::Vec3;
+use vec3::*;
 
 mod ray;
 use ray::*;
@@ -32,9 +33,10 @@ fn main() -> std::io::Result<()> {
 
     // Image
     let aspect_ratio: f64 = 16.0 / 9.0;
-    let image_width: usize = 1000;
+    let image_width: usize = 2000;
     let image_height: usize = (image_width as f64 / aspect_ratio).ceil() as usize;
     const SAMPLES_PER_PIXEL: u32 = 100;
+    const MAX_DEPTH: i32 = 50;
 
     // World
     let mut world = HittableList::new();
@@ -77,17 +79,18 @@ fn main() -> std::io::Result<()> {
 
     (0..image_height).into_par_iter().for_each(|j| {
         let mut rng = thread_rng();
+        let uniform = Uniform::from(RAND_RANGE);
         for i in 0..image_width {
             let mut pixel_color_vec = Vec3::zeros();
             for _ in 0..SAMPLES_PER_PIXEL {
-                let u = (i as f64 + rng.gen_range(RAND_RANGE)) / (image_width - 1) as f64;
-                let v = 1.0 - ((j as f64 + rng.gen_range(RAND_RANGE)) / (image_height - 1) as f64);
+                let u = (i as f64 + uniform.sample(&mut rng)) / (image_width - 1) as f64;
+                let v = 1.0 - ((j as f64 + uniform.sample(&mut rng)) / (image_height - 1) as f64);
 
                 let r = cam.get_ray(u, v);
 
-                pixel_color_vec += ray_color_vec(&r, &world);
+                pixel_color_vec += ray_color_vec(&r, &world, &mut rng, uniform, MAX_DEPTH);
             }
-            let scaled_pixel_color_vec = pixel_color_vec / SAMPLES_PER_PIXEL as f64;
+            let scaled_pixel_color_vec = (pixel_color_vec / SAMPLES_PER_PIXEL as f64).sqrt();
 
             let mut img = img.lock().unwrap();
             img.put_pixel(i as u32, j as u32, scaled_pixel_color_vec.into_color());

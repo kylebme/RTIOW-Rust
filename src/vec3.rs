@@ -1,4 +1,6 @@
 use std::ops;
+
+use rand::{prelude::{ThreadRng, Distribution}, Rng, distributions::Uniform};
 // use num::Float;
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -15,6 +17,32 @@ impl Vec3 {
 
     pub fn ones() -> Vec3 {
         Vec3 {x: 1.0, y: 1.0, z: 1.0}
+    }
+
+    pub fn random_in_unit_sphere(rng: &mut ThreadRng, uniform: Uniform<f64>) -> Vec3 {
+        loop {
+            let p = Vec3 {
+                x: uniform.sample(rng),
+                y: uniform.sample(rng),
+                z: uniform.sample(rng)
+            };
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+
+    pub fn random_unit_vector(rng: &mut ThreadRng, uniform: Uniform<f64>) -> Vec3 {
+        Vec3::random_in_unit_sphere(rng, uniform).unit_vec()
+    }
+
+    pub fn random_in_hemisphere(rng: &mut ThreadRng, uniform: Uniform<f64>, normal: Vec3) -> Vec3 {
+        let in_unit_sphere = Vec3::random_in_unit_sphere(rng, uniform);
+        if in_unit_sphere.dot(normal) > 0.0 {
+            return in_unit_sphere;
+        } else {
+            return -in_unit_sphere;
+        }
     }
 }
 
@@ -55,6 +83,16 @@ impl VecProducts for Vec3 {
             y: self.z * vec.x - self.x * vec.z,
             z: self.x * vec.y - self.y * vec.x
         }
+    }
+}
+
+pub trait Sqrt {
+    fn sqrt(&self) -> Self;
+}
+
+impl Sqrt for Vec3 {
+    fn sqrt(&self) -> Self {
+        Vec3 { x: self.x.sqrt(), y: self.y.sqrt(), z: self.z.sqrt() }
     }
 }
 
