@@ -65,16 +65,14 @@ fn main() -> std::io::Result<()> {
         .into(),
     );
 
-    let max_iter = 10.0;
-    let image_center = f64::from(image_width)/2.0;
-    for i in 0..max_iter as u32 {
+    for i in -5..5+1 {
         world.push(Sphere {
             center: Vec3 {
-                x: i as f64 * 10.0 - max_iter as f64/2.0 + image_center,
-                y: i as f64 * 10.0 - max_iter as f64/2.0 + image_center,
-                z: -1.0
+                x: i as f64 * 5.0,
+                y: 0.0,
+                z: -20.0
             },
-            radius: 0.1
+            radius: 3.0
         }.into()
         );
     }
@@ -90,7 +88,7 @@ fn main() -> std::io::Result<()> {
         SAMPLES_PER_PIXEL,
         MAX_DEPTH
     );
-    img.save("./image.tiff").unwrap();
+    img.save("./image.bmp").unwrap();
 
     println!("Time elapsed: {:?}", start.elapsed());
 
