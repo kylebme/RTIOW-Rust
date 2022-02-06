@@ -34,7 +34,7 @@ pub fn ray_color_vec(
     world: &impl Hit,
     rng: &mut ThreadRng,
     uniform: Uniform<f64>,
-    depth: i32,
+    depth: u32,
 ) -> Vec3 {
     if depth <= 0 {
         return Vec3::zeros();
