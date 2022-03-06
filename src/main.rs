@@ -14,9 +14,7 @@ mod ray;
 use ray::*;
 
 mod hit;
-
-mod hittable_list;
-use hittable_list::HittableList;
+use hit::HittableList;
 
 mod sphere;
 use sphere::Sphere;
@@ -27,6 +25,9 @@ use color::*;
 mod camera;
 use camera::*;
 
+mod material;
+use material::*;
+
 fn main() -> std::io::Result<()> {
     println!("Start");
     let start = Instant::now();
@@ -35,7 +36,7 @@ fn main() -> std::io::Result<()> {
     let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: u32 = 1000;
     let image_height: u32 = (image_width as f64 / aspect_ratio).ceil() as u32;
-    const SAMPLES_PER_PIXEL: u32 = 100;
+    const SAMPLES_PER_PIXEL: u32 = 200;
     const MAX_DEPTH: u32 = 50;
 
     // World
@@ -46,9 +47,42 @@ fn main() -> std::io::Result<()> {
             center: Vec3 {
                 x: 0.0,
                 y: 0.0,
-                z: -1.0,
+                z: -2.0,
             },
             radius: 0.5,
+            material: Lambertian {
+                albedo: Vec3 { x: 0.8, y: 0.8, z: 0.8 }
+            }.into()
+        }
+        .into(),
+    );
+    world.push(
+        Sphere {
+            center: Vec3 {
+                x: -1.0,
+                y: 0.0,
+                z: -2.0,
+            },
+            radius: 0.5,
+            material: Metal {
+                albedo: Vec3 { x: 0.1, y: 0.1, z: 0.5 },
+                fuzz: 0.1
+            }.into()
+        }
+        .into(),
+    );
+    world.push(
+        Sphere {
+            center: Vec3 {
+                x: 1.0,
+                y: 0.0,
+                z: -2.0,
+            },
+            radius: 0.5,
+            material: Metal {
+                albedo: Vec3 { x: 0.5, y: 0.0, z: 0.5 },
+                fuzz: 0.5
+            }.into()
         }
         .into(),
     );
@@ -61,6 +95,9 @@ fn main() -> std::io::Result<()> {
                 z: -1.0,
             },
             radius: 100.0,
+            material: Lambertian {
+                albedo: Vec3 { x: 0.9, y: 0.9, z: 0.9 }
+            }.into()
         }
         .into(),
     );
@@ -68,11 +105,14 @@ fn main() -> std::io::Result<()> {
     for i in -5..5+1 {
         world.push(Sphere {
             center: Vec3 {
-                x: i as f64 * 5.0,
-                y: 0.0,
-                z: -20.0
+                x: i as f64 * 0.50,
+                y: 0.10,
+                z: -0.80
             },
-            radius: 3.0
+            radius: 0.1,
+            material: Lambertian {
+                albedo: Vec3 { x: 0.5, y: 0.5, z: 0.5 }
+            }.into()
         }.into()
         );
     }

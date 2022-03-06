@@ -1,10 +1,12 @@
 use crate::vec3::*;
 use crate::ray::*;
 use crate::hit::*;
+use crate::material::MaterialEnum;
 
 pub struct Sphere {
     pub center: Vec3,
-    pub radius: f64
+    pub radius: f64,
+    pub material: MaterialEnum
 }
 
 impl Hit for Sphere {
@@ -31,7 +33,7 @@ impl Hit for Sphere {
         let record_p = r.at(root);
         let outward_normal = (record_p - self.center) / self.radius;
 
-        let hit_record = HitRecord::new(record_p, root, outward_normal, r);
+        let hit_record = HitRecord::new(record_p, root, &self.material, outward_normal, r);
 
         Some(hit_record)
     }

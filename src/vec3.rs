@@ -39,9 +39,9 @@ impl Vec3 {
     pub fn random_in_hemisphere(rng: &mut ThreadRng, uniform: Uniform<f64>, normal: Vec3) -> Vec3 {
         let in_unit_sphere = Vec3::random_in_unit_sphere(rng, uniform);
         if in_unit_sphere.dot(normal) > 0.0 {
-            return in_unit_sphere;
+            in_unit_sphere
         } else {
-            return -in_unit_sphere;
+            -in_unit_sphere
         }
     }
 }
@@ -50,6 +50,7 @@ pub trait VecLength {
     fn length(&self) -> f64;
     fn length_squared(&self) -> f64;
     fn unit_vec(self) -> Vec3;
+    fn near_zero(&self) -> bool;
 }
 
 impl VecLength for Vec3 {
@@ -63,6 +64,11 @@ impl VecLength for Vec3 {
 
     fn unit_vec(self) -> Vec3 {
         self / self.length()
+    }
+
+    fn near_zero(&self) -> bool {
+        let epsilon = 1e-8;
+        (self.x < epsilon) && (self.y < epsilon) && (self.z < epsilon)
     }
 }
 
@@ -93,6 +99,16 @@ pub trait Sqrt {
 impl Sqrt for Vec3 {
     fn sqrt(&self) -> Self {
         Vec3 { x: self.x.sqrt(), y: self.y.sqrt(), z: self.z.sqrt() }
+    }
+}
+
+pub trait Reflect {
+    fn reflect(self, normal: Vec3) -> Vec3;
+}
+
+impl Reflect for Vec3 {
+    fn reflect(self, normal: Vec3) -> Vec3 {
+        self - 2.0 * self.dot(normal) * normal
     }
 }
 
