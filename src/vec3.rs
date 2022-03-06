@@ -44,6 +44,20 @@ impl Vec3 {
             -in_unit_sphere
         }
     }
+
+    // Should add some strong typing to this random range
+    pub fn random_in_unit_disk(rng: &mut ThreadRng, uniform_neg1_1: Uniform<f64>) -> Vec3 {
+        loop {
+            let p = Vec3 {
+                x: uniform_neg1_1.sample(rng),
+                y: uniform_neg1_1.sample(rng),
+                z: 0.0
+            };
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
 }
 
 pub trait VecLength {

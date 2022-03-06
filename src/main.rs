@@ -34,9 +34,9 @@ fn main() -> std::io::Result<()> {
 
     // Image
     let aspect_ratio: f64 = 16.0 / 9.0;
-    let image_width: u32 = 1000;
+    let image_width: u32 = 2000;
     let image_height: u32 = (image_width as f64 / aspect_ratio).ceil() as u32;
-    const SAMPLES_PER_PIXEL: u32 = 200;
+    const SAMPLES_PER_PIXEL: u32 = 100;
     const MAX_DEPTH: u32 = 50;
 
     // World
@@ -66,7 +66,7 @@ fn main() -> std::io::Result<()> {
             radius: 0.5,
             material: Metal {
                 albedo: Vec3 { x: 0.1, y: 0.1, z: 0.5 },
-                fuzz: 0.1
+                fuzz: 0.0
             }.into()
         }
         .into(),
@@ -118,7 +118,15 @@ fn main() -> std::io::Result<()> {
     }
 
     // Camera
-    let cam = Camera::new(Vec3::zeros(), aspect_ratio, 2.0, 1.0);
+    let cam = Camera::new(
+        Vec3 { x: -2., y: 2., z: 1. }, 
+        Vec3 { x: 0., y: 0., z: -2. }, 
+        Vec3 { x: 0., y: 1., z: 0. },
+        60.0, 
+        aspect_ratio,
+        0.10,
+        4.0
+    );
 
     let img = render(
         world,
@@ -150,20 +158,20 @@ fn render(
         image_height as u32,
     )));
 
-    const RAND_RANGE: std::ops::Range<f64> = 0.0..1.0;
-
     (0..image_height).into_par_iter().for_each(|j| {
         let mut rng = thread_rng();
-        let uniform = Uniform::from(RAND_RANGE);
+        let uniform_0_1 = Uniform::from(0.0..1.0);
+        let uniform_neg1_1 = Uniform::from(-1.0..1.0);
+
         for i in 0..image_width {
             let mut pixel_color_vec = Vec3::zeros();
             for _ in 0..samples_per_pixel {
-                let u = (i as f64 + uniform.sample(&mut rng)) / (image_width - 1) as f64;
-                let v = 1.0 - ((j as f64 + uniform.sample(&mut rng)) / (image_height - 1) as f64);
+                let u = (i as f64 + uniform_0_1.sample(&mut rng)) / (image_width - 1) as f64;
+                let v = 1.0 - ((j as f64 + uniform_0_1.sample(&mut rng)) / (image_height - 1) as f64);
 
-                let r = cam.get_ray(u, v);
+                let r = cam.get_ray(u, v, &mut rng, uniform_neg1_1);
 
-                pixel_color_vec += ray_color_vec(&r, &world, &mut rng, uniform, max_depth);
+                pixel_color_vec += ray_color_vec(&r, &world, &mut rng, uniform_0_1, max_depth);
             }
             let scaled_pixel_color_vec = (pixel_color_vec / samples_per_pixel as f64).sqrt();
 

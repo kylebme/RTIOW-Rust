@@ -1,48 +1,64 @@
 use crate::ray::Ray;
-use crate::vec3::Vec3;
+use crate::vec3::{Vec3, VecLength, VecProducts};
+use rand::{prelude::ThreadRng, distributions::Uniform};
 
 pub struct Camera {
     origin: Vec3,
     lower_left_corner: Vec3,
     horizontal: Vec3,
     vertical: Vec3,
-    focal_length: f64,
+    u: Vec3,
+    v: Vec3,
+    w: Vec3,
+    lens_radius: f64
 }
 
 impl Camera {
-    pub fn new(origin: Vec3, aspect_ratio: f64, viewport_height: f64, focal_length: f64) -> Camera {
+    pub fn new(
+        look_from: Vec3,
+        look_at: Vec3,
+        v_up: Vec3,
+        v_fov: f64,
+        aspect_ratio: f64,
+        aperture: f64,
+        focus_dist: f64,
+    ) -> Camera {
+        let theta = v_fov.to_radians();
+        let h = (theta / 2.0).tan();
+        let viewport_height = h * 2.0;
         let viewport_width: f64 = aspect_ratio * viewport_height;
-        let horizontal = Vec3 {
-            x: viewport_width,
-            y: 0.0,
-            z: 0.0,
-        };
-        let vertical = Vec3 {
-            x: 0.0,
-            y: viewport_height,
-            z: 0.0,
-        };
+
+        let w = (look_from - look_at).unit_vec();
+        let u = v_up.cross(w).unit_vec();
+        let v = w.cross(u);
+
+        let origin = look_from;
+
+        let horizontal = focus_dist * viewport_width * u;
+        let vertical = focus_dist * viewport_height * v;
+        let lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 - focus_dist * w;
+
+        let lens_radius = aperture / 2.0;
+
         Camera {
             origin,
-            lower_left_corner: origin
-                - horizontal / 2.0
-                - vertical / 2.0
-                - Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: focal_length,
-                },
+            lower_left_corner,
             horizontal,
             vertical,
-            focal_length,
+            u,
+            v,
+            w,
+            lens_radius
         }
     }
 
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+    pub fn get_ray(&self, s: f64, t: f64, rng: &mut ThreadRng, uniform_neg1_1: Uniform<f64>) -> Ray {
+        let rd = self.lens_radius * Vec3::random_in_unit_disk(rng, uniform_neg1_1);
+        let offset = self.u * rd.x + self.v * rd.y;
         Ray {
-            origin: self.origin,
-            direction: self.lower_left_corner + u * self.horizontal + v * self.vertical
-                - self.origin,
+            origin: self.origin + offset,
+            direction: self.lower_left_corner + s * self.horizontal + t * self.vertical
+                - self.origin - offset,
         }
     }
 }
