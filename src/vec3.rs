@@ -112,6 +112,19 @@ impl Reflect for Vec3 {
     }
 }
 
+pub trait Refract {
+    fn refract(self, normal: Vec3, etai_over_etat: f64) -> Vec3;
+}
+
+impl Refract for Vec3 {
+    fn refract(self, normal: Vec3, etai_over_etat: f64) -> Vec3 {
+        let cos_theta = -self.dot(normal).min(1.0);
+        let r_out_perpendicular = etai_over_etat * (self + cos_theta * normal);
+        let r_out_parallel = (1.0 - r_out_perpendicular.length_squared()).abs().sqrt() * normal;
+        r_out_parallel + r_out_perpendicular
+    }
+}
+
 // Operator Overloads
 
 impl ops::Add<Vec3> for Vec3 {

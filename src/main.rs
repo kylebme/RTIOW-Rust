@@ -49,9 +49,9 @@ fn main() -> std::io::Result<()> {
                 y: 0.0,
                 z: -2.0,
             },
-            radius: 0.5,
-            material: Lambertian {
-                albedo: Vec3 { x: 0.8, y: 0.8, z: 0.8 }
+            radius: -0.5,
+            material: Dielectric {
+                ir: 1.5
             }.into()
         }
         .into(),
@@ -143,6 +143,7 @@ fn render(
     samples_per_pixel: u32,
     max_depth: u32,
 ) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
+    
     // Render
     let img = Arc::new(Mutex::new(RgbImage::new(
         image_width as u32,
