@@ -1,5 +1,6 @@
 use crate::hit::Hit;
 use crate::ray::*;
+use crate::uniform_wrapper::*;
 use crate::vec3::*;
 use image::Rgb;
 use rand::distributions::Uniform;
@@ -33,8 +34,8 @@ impl IntoColor for [f64; 3] {
 pub fn ray_color_vec(
     r: &Ray,
     world: &impl Hit,
-    rng: &mut ThreadRng,
-    uniform: Uniform<f64>,
+    unigen0_1: &mut UniGen0_1,
+    unigen_neg1_1: &mut UniGenNeg1_1,
     depth: u32,
 ) -> Vec3 {
     if depth == 0 {
@@ -43,9 +44,9 @@ pub fn ray_color_vec(
 
     let option_rec = world.hit(r, 0.001, f64::INFINITY);
     if let Some(rec) = option_rec {
-        let scatter_result_option = rec.mat_ref.scatter(r, &rec, rng, uniform);
+        let scatter_result_option = rec.mat_ref.scatter(r, &rec, unigen0_1, unigen_neg1_1);
         if let Some(scatter_result) = scatter_result_option {
-            scatter_result.attenuation * ray_color_vec(&scatter_result.ray, world, rng, uniform, depth - 1)
+            scatter_result.attenuation * ray_color_vec(&scatter_result.ray, world, unigen0_1, unigen_neg1_1, depth - 1)
         } else {
             Vec3::zeros()
         }

@@ -1,5 +1,6 @@
 use crate::ray::Ray;
 use crate::vec3::{Vec3, VecLength, VecProducts};
+use crate::uniform_wrapper::*;
 use rand::{prelude::ThreadRng, distributions::Uniform};
 
 pub struct Camera {
@@ -52,8 +53,8 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, s: f64, t: f64, rng: &mut ThreadRng, uniform_neg1_1: Uniform<f64>) -> Ray {
-        let rd = self.lens_radius * Vec3::random_in_unit_disk(rng, uniform_neg1_1);
+    pub fn get_ray(&self, s: f64, t: f64, unigen: &mut UniGenNeg1_1) -> Ray {
+        let rd = self.lens_radius * Vec3::random_in_unit_disk(unigen);
         let offset = self.u * rd.x + self.v * rd.y;
         Ray {
             origin: self.origin + offset,

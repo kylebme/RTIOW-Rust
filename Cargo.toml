@@ -12,8 +12,9 @@ num = "^0"
 enum_dispatch = "^0"
 rand = "^0"
 rayon = "^0"
+indicatif = {version = "^0", features = ["rayon"]}
 
 [profile.dev]
 opt-level = 2
-lto = false
-debug = true
+lto = true
+debug = false
