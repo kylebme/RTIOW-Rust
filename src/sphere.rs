@@ -22,9 +22,9 @@ impl Hit for Sphere {
         }
 
         let sqrtd = discriminant.sqrt();
-        let root = (-half_b - sqrtd) / a;
+        let mut root = (-half_b - sqrtd) / a;
         if root < t_min || root > t_max {
-            let root = (-half_b + sqrtd) / a;
+            root = (-half_b + sqrtd) / a;
             if root < t_min || root > t_max {
                 return None;
             }
