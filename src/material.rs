@@ -118,7 +118,6 @@ impl Material for Dielectric {
         let refraction_ratio = if hit_rec.front_face {
             1.0 / self.ir
         } else {
-            println!("back face");
             self.ir
         };
         
